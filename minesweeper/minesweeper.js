@@ -4,6 +4,9 @@ var grid = [];
 var gameOverBoolean = false;
 var gameIsStarted = false;
 var highScore = 0;
+var currentSeconds = 0;
+var interval;
+
 var makeNewBoard = function(){
   for(var i = 0; i < 10; i++){
     grid[i] = [0,0,0,0,0,0,0,0,0,0];
@@ -18,10 +21,16 @@ var makeNewBoard = function(){
     }
   }
 }
+
 var playMineSweeper = function(width){
   currentSeconds = 0;
   gameIsStarted = true;
   gameOverBoolean = false;
+  interval = setInterval(function() {
+    if(gameIsStarted){
+      document.getElementById("MinesweeperTimer").innerHTML = ++currentSeconds;
+    }
+  }, 1000);
   makeNewBoard();
   var s = "";
   for(var i = 0; i < width; i++){
@@ -35,6 +44,7 @@ var playMineSweeper = function(width){
 
   document.getElementById("MinesweeperTiles").innerHTML = s;
 }
+
 var clickTile = function(id){
   if(!gameOverBoolean){
     if(document.getElementById(id).innerHTML !== "@"){
@@ -45,26 +55,29 @@ var clickTile = function(id){
     }
   }
 }
+
 var getRandomNumber = function(){
 	return Math.floor((Math.random() * 10));
 }
+
 var turnTile = function(x, y){
   document.getElementById(x + "" + y).className = "turnedTile" + getAmountOfSurroundingBombs(x, y);
 
   if(getAmountOfSurroundingBombs(x, y) === 0){
     expand(x, y);
   }
-  console.log(getAmountOfTurnedTiles());
   if(getAmountOfTurnedTiles() === 80){
     window.alert("You win");
-    if(currentSeconds < highscore){
-      highscore = currentSeconds;
+    if(currentSeconds < highScore || highScore === 0){
+      highScore = currentSeconds;
     }
     gameIsStarted = false;
-    document.getElementById("MinesweeperHighscore").innerHTML = "Higscore: " + highscore;
+    clearInterval(interval);
+    document.getElementById("MinesweeperHighscore").innerHTML = "Higscore: " + highScore;
   }
   return getAmountOfSurroundingBombs(x, y) + "";
 }
+
 var getAmountOfSurroundingBombs = function(x, y) {
   if(grid[x][y] === 1){
     gameOver();
@@ -81,12 +94,14 @@ var getAmountOfSurroundingBombs = function(x, y) {
   }
   return surroundingBombs;
 }
+
 var getIfBomb = function(x, y){
   if(x < 0 || y < 0 || x > 9 || y > 9){
     return false;
   }
   return grid[x][y] === 1;
 }
+
 var expand = function(x, y){
   var tilesToTurn = [];
   for(var i = x - 1; i <= x + 1; i++){
@@ -103,6 +118,7 @@ var expand = function(x, y){
   }
   return tilesToTurn;
 }
+
 var placeFlag = function(id){
     if(document.getElementById(id).innerHTML === ""){
     document.getElementById(id).innerHTML = "@";
@@ -112,6 +128,7 @@ var placeFlag = function(id){
     }
     return false;
 }
+
 var gameOver = function(){
   for(var i = 0; i < 10; i++){
     for(var j = 0; j < 10; j++){
@@ -124,18 +141,16 @@ var gameOver = function(){
   }
   gameOverBoolean = true;
   gameIsStarted = false;
+  clearInterval(interval);
 }
-var currentSeconds = 0;
-var interval = setInterval(function() {
-  if(gameIsStarted){
-    document.getElementById("MinesweeperTimer").innerHTML = ++currentSeconds;
-  }
-}, 1000);
-var getAmountOfTurnedTiles = function(){
+
+
+
+var getAmountOfTurnedTiles = function() {
   var amount = 0;
-  for(var i = 0; i < 10; i ++){
-    for(var j = 0; j < 10; j++){
-      if(document.getElementById(i + "" + j).className !== "MinesweeperTile" && !(document.getElementById(i + "" + j).className === "bombTile")){
+  for(var i = 0; i < 10; i ++) {
+    for(var j = 0; j < 10; j++) {
+      if(document.getElementById(i + "" + j).className !== "MinesweeperTile" && !(document.getElementById(i + "" + j).className === "bombTile")) {
         amount++;
       }
     }
